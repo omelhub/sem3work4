@@ -92,8 +92,6 @@
     <Compile Include="DataAccessLayer\EntityRepository.cs" />
     <Compile Include="DataAccessLayer\IRepository.cs" />
     <Compile Include="DataAccessLayer\StudentContext.cs" />
-    <Compile Include="EventArgs\StudentAddArgs.cs" />
-    <Compile Include="EventArgs\StudentDeleteArgs.cs" />
     <Compile Include="IDomainObject.cs" />
     <Compile Include="IModel.cs" />
     <Compile Include="SimpleConfigModule.cs" />
@@ -104,6 +102,12 @@
   <ItemGroup>
     <None Include="App.config" />
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\SharedEventArgs\SharedEventArgs.csproj">
+      <Project>{a511193f-a25e-44fc-9f8b-5ed4ea590bbd}</Project>
+      <Name>SharedEventArgs</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">

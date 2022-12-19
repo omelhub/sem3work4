@@ -1,4 +1,4 @@
-﻿using M.EventArgs;
+﻿using SharedEventArgs;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,9 +19,5 @@ namespace M
         void DeleteStudent();
 
         List<Student> GetAll();
-
-        bool IsCanAddStudent(Student student);
-
-        Dictionary<string, int> DistributionOfSpecialties();
     }
 }

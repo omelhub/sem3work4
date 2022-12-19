@@ -1,5 +1,5 @@
 ﻿using M.DataAccessLayer;
-using M.EventArgs;
+using SharedEventArgs;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,7 +12,6 @@ namespace M
 {
     public class StudentLogic : IModel
     {
-        //public IList<Student> Students = new List<Student>();
         public event EventHandler<StudentAddArgs> EventStudentAddModel = delegate { };
         public event EventHandler<StudentDeleteArgs> EventStudentDeleteModel = delegate { };
 
@@ -29,7 +28,7 @@ namespace M
         {
             repository.Create(student);
             repository.Save();
-            EventStudentAddModel(this, new StudentAddArgs(student));
+            EventStudentAddModel(this, new StudentAddArgs((student.Name, student.Speciality, student.Group)));
         }
 
         /// <summary>
@@ -61,41 +60,6 @@ namespace M
         public List<Student> GetAll()
         {
             return repository.GetAll().ToList();
-        }
-
-        /// <summary>
-        /// Библиотека специальностей и количества студентов
-        /// </summary>
-        public Dictionary<string, int> DistributionOfSpecialties()
-        {
-            Dictionary<string, int> specialtiesDistribution = new Dictionary<string, int>();
-
-            foreach (Student student in (List<Student>)repository.GetAll())
-            {
-                if (specialtiesDistribution.ContainsKey(student.Speciality))
-                    specialtiesDistribution[student.Speciality] += 1;
-
-                else
-                    specialtiesDistribution[student.Speciality] = 1;
-            }
-            return specialtiesDistribution;
-        }
-
-        /// <summary>
-        /// Можно ли добавить этого студента?
-        /// </summary>
-        public bool IsCanAddStudent(Student student)
-        {
-            if (!string.IsNullOrEmpty(student.Name) && !string.IsNullOrEmpty(student.Speciality) && !string.IsNullOrEmpty(student.Group)) //можно добавить студента, если заполнены все поля
-            {
-                //foreach (var item in repository.GetAll())
-                //{
-                //    if (item.Name == student.Name && item.Speciality == student.Speciality && item.Group == student.Group)
-                //        return false; //запрещает добавление тёсок
-                //}
-                return true;
-            }
-            return false;
         }
     }
 }

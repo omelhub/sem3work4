@@ -99,14 +99,6 @@
       <Project>{1C65DAF8-D83A-4C0E-A6FB-0FB9D772AC49}</Project>
       <Name>M</Name>
     </ProjectReference>
-    <ProjectReference Include="..\P\P.csproj">
-      <Project>{104A5DE2-93FB-40E3-A492-9A9C610F070F}</Project>
-      <Name>P</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Shared\Shared.csproj">
-      <Project>{5126E4C4-EFD7-41D3-8260-A92A4103B34F}</Project>
-      <Name>Shared</Name>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">

@@ -49,7 +49,7 @@
             this.listView1.View = System.Windows.Forms.View.List;
             this.listView1.GridLines = true;                    //границы
             this.listView1.FullRowSelect = true;                //выбор целой строки   
-            this.listView1.MultiSelect = false;                 //отрубает возможность выбора нескольких элементов
+            this.listView1.MultiSelect = true;                 //включает возможность выбора нескольких элементов
             this.listView1.SelectedIndexChanged += new System.EventHandler(this.listView1_SelectedIndexChanged);
             // 
             // buttonAdd

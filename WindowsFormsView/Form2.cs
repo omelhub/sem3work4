@@ -1,4 +1,5 @@
 ﻿using M;
+using M.DataAccessLayer;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -14,16 +15,13 @@ namespace WindowsFormsView
 {
     public partial class Form2 : Form
     {
-        public Form2(IModel studentModel)
+        public Form2(ListView.ListViewItemCollection items)
         {
             InitializeComponent();
-            this.studentModel = studentModel;
-            DrawGraph();
+            DrawGraph(items);
         }
 
-        IModel studentModel;
-
-        private void DrawGraph()
+        private void DrawGraph(ListView.ListViewItemCollection items)
         {
             GraphPane pane = zedGraphControl1.GraphPane;
 
@@ -39,11 +37,19 @@ namespace WindowsFormsView
 
             Random r = new Random();
 
-            var distributionOfSpecialties = studentModel.DistributionOfSpecialties();
-
-            foreach (var key in distributionOfSpecialties.Keys)
+            Dictionary<string, int> specialtiesDistribution = new Dictionary<string, int>();
+            foreach (ListViewItem item in items)
             {
-                pane.AddBar(key, null, new double[] { distributionOfSpecialties[key] }, Color.FromArgb(r.Next(0, 256), r.Next(0, 256), r.Next(0, 256)));
+                if (specialtiesDistribution.ContainsKey(item.SubItems[1].Text))
+                    specialtiesDistribution[item.SubItems[1].Text] += 1;
+
+                else
+                    specialtiesDistribution[item.SubItems[1].Text] = 1;
+            }
+
+            foreach (var key in specialtiesDistribution.Keys)
+            {
+                pane.AddBar(key, null, new double[] { specialtiesDistribution[key] }, Color.FromArgb(r.Next(0, 256), r.Next(0, 256), r.Next(0, 256)));
             }
 
             pane.BarSettings.MinBarGap = 1.5f;

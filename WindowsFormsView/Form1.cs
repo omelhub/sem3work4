@@ -1,8 +1,4 @@
-﻿using M;
-using M.EventArgs;
-using Ninject;
-using P;
-using Shared;
+﻿using SharedEventArgs;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -15,6 +11,10 @@ using System.Web.UI.WebControls;
 using System.Windows.Forms;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 using View = System.Windows.Forms.View;
+using System.Xml.Linq;
+using M;
+using System.Reflection;
+using System.Globalization;
 
 namespace WindowsFormsView
 {
@@ -23,34 +23,26 @@ namespace WindowsFormsView
         public Form1()
         {
             InitializeComponent();
-            IKernel ninjectKernel = new StandardKernel(new SimpleConfigModule());
-            studentModel = ninjectKernel.Get<StudentLogic>();
-            presenter = new PresenterStudent(this, studentModel);
-
-            //тестовый список студентов
-            studentModel.AddStudent(new Student { Name = "Иванов", Speciality = "Информатика", Group = "КИ21-18Б" });
-            //studentModel.AddStudent("Петров", "Информатика", "КИ21-21Б");
-            //studentModel.AddStudent("Сидоров", "Информатика", "КИ21-21Б");
-            //studentModel.AddStudent("Лагойда", "Информатика", "КИ21-21Б");
-            //studentModel.AddStudent("Машкова", "Биология", "КИ21-01А");
-            //studentModel.AddStudent("Викторова", "Биология", "КИ21-02А");
         }
 
+        public event EventHandler<StudentAllArgs> EventStudentView = delegate { };
         public event EventHandler<StudentAddArgs> EventStudentAddView = delegate { };
         public event EventHandler<StudentDeleteArgs> EventStudentDeleteView = delegate { };
-        private PresenterStudent presenter;
-        public IModel studentModel;
 
         private void Form1_Load(object sender, EventArgs e)
         {
             RefreshListView();
+
+            //тестовый список студентов
+            EventStudentAddView.Invoke(this, new StudentAddArgs(("Иванов", "Английский", "УБ21-18Б")));
+            EventStudentAddView.Invoke(this, new StudentAddArgs(("Машкова", "Математика", "МФ21-18Б")));
         }
 
-        public void AddStudent(Student student)
+        public void AddStudent((string, string, string) studentInfo)
         {
-            ListViewItem newitem = new ListViewItem(student.Name);
-            newitem.SubItems.Add(student.Group);
-            newitem.SubItems.Add(student.Speciality);
+            ListViewItem newitem = new ListViewItem(studentInfo.Item1);
+            newitem.SubItems.Add(studentInfo.Item2);
+            newitem.SubItems.Add(studentInfo.Item3);
             listView1.Items.Add(newitem);
         }
 
@@ -69,14 +61,7 @@ namespace WindowsFormsView
             listView1.Columns.Add("Cпециальность", 100);
             listView1.Columns.Add("Группа", 100);
 
-            foreach (Student student in studentModel.GetAll())
-            {
-                ListViewItem newitem = new ListViewItem(student.Name);
-                newitem.SubItems.Add(student.Speciality);
-                newitem.SubItems.Add(student.Group);
-
-                listView1.Items.Add(newitem);
-            }
+            EventStudentView.Invoke(this, new StudentAllArgs());
         }
 
         public void RefreshGraph()
@@ -85,7 +70,7 @@ namespace WindowsFormsView
             {
                 Application.OpenForms.OfType<Form2>().First().Close();
 
-                Form2 newForm2 = new Form2(studentModel);
+                Form2 newForm2 = new Form2(listView1.Items);
 
                 newForm2.Show();
             }
@@ -95,10 +80,10 @@ namespace WindowsFormsView
 
         private void buttonAdd_Click(object sender, EventArgs e)
         {
-            Student student = new Student() { Name = NameBox.Text.Trim(), Group = GroupBox.Text.Trim(), Speciality = SpecialityBox.Text.Trim() };
-            if (studentModel.IsCanAddStudent(student))
+            var (name, group, speciality) = (NameBox.Text.Trim(), GroupBox.Text.Trim(), SpecialityBox.Text.Trim());
+            if (!string.IsNullOrEmpty(name) && !string.IsNullOrEmpty(speciality) && !string.IsNullOrEmpty(group))
             {
-                EventStudentAddView(this, new StudentAddArgs(student));
+                EventStudentAddView.Invoke(this, new StudentAddArgs((name, speciality, group)));
                 RefreshGraph();
             }
         }
@@ -107,16 +92,20 @@ namespace WindowsFormsView
         {
             if (listView1.SelectedIndices.Count != 0)
             {
-                //foreach (int index in listView1.SelectedIndices)
-                //{
-                //    List<int> ids = new List<int>();
-                //    ids.Add(studentModel.GetAll().ElementAt(index).Id);
-                //    foreach (int id in ids)
-                //        studentModel.DeleteStudent(id);
-                //} //код, который можно было бы использовать, если бы был включен multiselection
+                int[] indices = new int[listView1.SelectedIndices.Count];
+                listView1.SelectedIndices.CopyTo(indices,0);
 
-                EventStudentDeleteView(this, new StudentDeleteArgs(listView1.SelectedIndices[0]));
-
+                for (int i = 0; i < indices.Length; i++)
+                {
+                    for (int j = i + 1; j < indices.Length; j++)
+                    {
+                        if (indices[j] > indices[i])
+                        {
+                            indices[j] -= 1;
+                        }
+                    }
+                    EventStudentDeleteView.Invoke(this, new StudentDeleteArgs(indices[i]));
+                }
                 RefreshGraph();
             }
         }
@@ -128,15 +117,12 @@ namespace WindowsFormsView
                 Application.OpenForms.OfType<Form2>().First().Close();
             }
 
-            Form2 newForm2 = new Form2(studentModel);
+            Form2 newForm2 = new Form2(listView1.Items);
 
             newForm2.Show();
         }
 
-        private void listView1_SelectedIndexChanged(object sender, EventArgs e)
-        {
-
-        }
+        private void listView1_SelectedIndexChanged(object sender, EventArgs e){}
 
         #endregion
     }
